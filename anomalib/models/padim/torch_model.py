@@ -15,6 +15,7 @@ from anomalib.models.components import FeatureExtractor, MultiVariateGaussian
 from anomalib.models.components.feature_extractors import dryrun_find_featuremap_dims
 from anomalib.models.padim.anomaly_map import AnomalyMapGenerator
 from anomalib.pre_processing import Tiler
+from typing import Union
 
 # defaults from the paper
 _N_FEATURES_DEFAULTS = {
@@ -63,7 +64,7 @@ class PadimModel(nn.Module):
         input_size: tuple[int, int],
         layers: list[str],
         backbone: str = "resnet18",
-        pre_trained: bool = True,
+        pre_trained: Union[bool,str] = True,
         n_features: int | None = None,
     ) -> None:
         super().__init__()

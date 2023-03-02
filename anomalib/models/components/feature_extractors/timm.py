@@ -15,6 +15,8 @@ import timm
 import torch
 from torch import Tensor, nn
 
+from typing import Union
+
 logger = logging.getLogger(__name__)
 
 
@@ -43,19 +45,29 @@ class TimmFeatureExtractor(nn.Module):
             [torch.Size([32, 64, 64, 64]), torch.Size([32, 128, 32, 32]), torch.Size([32, 256, 16, 16])]
     """
 
-    def __init__(self, backbone: str, layers: list[str], pre_trained: bool = True, requires_grad: bool = False):
+    def __init__(self, backbone: str, layers: list[str], pre_trained: Union[bool,str] = True, requires_grad: bool = False):
         super().__init__()
         self.backbone = backbone
         self.layers = layers
         self.idx = self._map_layer_to_idx()
         self.requires_grad = requires_grad
-        self.feature_extractor = timm.create_model(
-            backbone,
-            pretrained=pre_trained,
-            features_only=True,
-            exportable=True,
-            out_indices=self.idx,
-        )
+        if type(pre_trained) is str:
+            self.feature_extractor = timm.create_model(
+                backbone,
+                pretrained=True,
+                checkpoint_path=pre_trained,
+                features_only=True,
+                exportable=True,
+                out_indices=self.idx,
+            )
+        else:
+            self.feature_extractor = timm.create_model(
+                backbone,
+                pretrained=pre_trained,
+                features_only=True,
+                exportable=True,
+                out_indices=self.idx,
+            )
         self.out_dims = self.feature_extractor.feature_info.channels()
         self._features = {layer: torch.empty(0) for layer in self.layers}
 
